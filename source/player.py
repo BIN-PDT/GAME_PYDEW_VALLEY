@@ -1,16 +1,23 @@
 import pygame
 from settings import *
+from supports import import_folder_dict
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)
+        self.load_assets()
+        # ANIMATION.
+        self.status = "down_idle"
+        self.frame_index = 0
         # SETUP.
-        self.image = pygame.Surface((32, 64))
-        self.image.fill("green")
+        self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_frect(center=pos)
         # MOVEMENT.
         self.direction, self.speed = Vector2(), 200
+
+    def load_assets(self):
+        self.animations = import_folder_dict("images", "character", subordinate=True)
 
     def input(self):
         keys = pygame.key.get_pressed()
