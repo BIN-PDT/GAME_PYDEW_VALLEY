@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         # SETUP.
         self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_frect(center=pos)
+        self.z = LAYERS["main"]
         # MOVEMENT.
         self.direction, self.speed = Vector2(), 200
         # TIMER.
