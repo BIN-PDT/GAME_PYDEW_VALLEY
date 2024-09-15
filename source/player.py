@@ -18,14 +18,26 @@ class Player(pygame.sprite.Sprite):
         # MOVEMENT.
         self.direction, self.speed = Vector2(), 200
         # TIMER.
-        self.timers = {"tool_use": Timer(350, self.use_tool)}
+        self.timers = {
+            "tool_use": Timer(350, self.use_tool),
+            "tool_switch": Timer(200),
+            "seed_use": Timer(350, self.use_seed),
+            "seed_switch": Timer(200),
+        }
         # TOOL.
-        self.selected_tool = "water"
+        self.tool_index = 0
+        self.selected_tool = TOOL_CHOICES[self.tool_index]
+        # SEED.
+        self.seed_index = 0
+        self.selected_seed = SEED_CHOICES[self.seed_index]
 
     def load_assets(self):
         self.animations = import_folder_dict("images", "character", subordinate=True)
 
     def use_tool(self):
+        pass
+
+    def use_seed(self):
         pass
 
     def input(self):
@@ -51,11 +63,31 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.direction.y = 0
             # TOOL USE.
-            if keys[pygame.K_SPACE]:
+            if keys[pygame.K_SPACE] and not self.timers["tool_use"].is_active:
                 self.timers["tool_use"].activate()
                 # RESET FOR ANIMATION.
                 self.direction = Vector2()
                 self.frame_index = 0
+            # TOOL SWITCH.
+            if keys[pygame.K_q] and not self.timers["tool_switch"].is_active:
+                self.timers["tool_switch"].activate()
+
+                self.tool_index += 1
+                self.tool_index %= len(TOOL_CHOICES)
+                self.selected_tool = TOOL_CHOICES[self.tool_index]
+            # SEED USE.
+            if keys[pygame.K_LCTRL] and not self.timers["seed_use"].is_active:
+                self.timers["seed_use"].activate()
+                # RESET FOR ANIMATION.
+                self.direction = Vector2()
+                self.frame_index = 0
+            # SEED SWITCH.
+            if keys[pygame.K_e] and not self.timers["seed_switch"].is_active:
+                self.timers["seed_switch"].activate()
+
+                self.seed_index += 1
+                self.seed_index %= len(SEED_CHOICES)
+                self.selected_seed = SEED_CHOICES[self.seed_index]
 
     def get_status(self):
         # IDLE.

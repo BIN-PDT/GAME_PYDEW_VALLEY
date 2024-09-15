@@ -33,6 +33,8 @@ LAYERS = {
     "rain drops": 10,
 }
 # GAME DATA.
+TOOL_CHOICES = ("hoe", "axe", "water")
+SEED_CHOICES = ("corn", "tomato")
 GROW_SPEED = {"corn": 1, "tomato": 0.7}
 SALE_PRICES = {"wood": 4, "apple": 2, "corn": 10, "tomato": 20}
 PURCHASE_PRICES = {"corn": 4, "tomato": 5}
