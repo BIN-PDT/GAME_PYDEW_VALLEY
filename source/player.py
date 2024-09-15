@@ -5,7 +5,7 @@ from timers import Timer
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups):
+    def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
         self.load_assets()
         # ANIMATION.
@@ -18,6 +18,9 @@ class Player(pygame.sprite.Sprite):
         self.z = LAYERS["main"]
         # MOVEMENT.
         self.direction, self.speed = Vector2(), 200
+        # COLLISION.
+        self.collision_sprites = collision_sprites
+        self.hitbox = self.rect.inflate((-126, -70))
         # TIMER.
         self.timers = {
             "tool_use": Timer(350, self.use_tool),
@@ -98,14 +101,36 @@ class Player(pygame.sprite.Sprite):
         if self.timers["tool_use"].is_active:
             self.status = self.status.split("_")[0] + f"_{self.selected_tool}"
 
+    def collide(self, direction):
+        for sprite in filter(
+            lambda sprite: hasattr(sprite, "hitbox"), self.collision_sprites.sprites()
+        ):
+            if self.hitbox.colliderect(sprite.hitbox):
+                if direction == "horizontal":
+                    if self.direction.x < 0:
+                        self.hitbox.left = sprite.hitbox.right
+                    elif self.direction.x > 0:
+                        self.hitbox.right = sprite.hitbox.left
+                    self.rect.centerx = self.hitbox.centerx
+                else:
+                    if self.direction.y < 0:
+                        self.hitbox.top = sprite.hitbox.bottom
+                    elif self.direction.y > 0:
+                        self.hitbox.bottom = sprite.hitbox.top
+                    self.rect.centery = self.hitbox.centery
+
     def move(self, dt):
         # NORMALIZE MOVEMENT.
         if self.direction:
             self.direction = self.direction.normalize()
         # HORIZONTAL MOVEMENT.
         self.rect.centerx += self.direction.x * self.speed * dt
+        self.hitbox.centerx = self.rect.centerx
+        self.collide("horizontal")
         # VERTICAL MOVEMENT.
         self.rect.centery += self.direction.y * self.speed * dt
+        self.hitbox.centery = self.rect.centery
+        self.collide("vertical")
 
     def animate(self, dt):
         ANIMATION = self.animations[self.status]

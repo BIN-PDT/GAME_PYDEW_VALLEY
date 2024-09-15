@@ -15,13 +15,12 @@ class Level:
         self.screen = pygame.display.get_surface()
         # GROUPS.
         self.all_sprites = AllSprites()
+        self.collision_sprites = pygame.sprite.Group()
         # SETUP.
         self.load_data()
         self.overlay = Overlay(self.player)
 
     def load_data(self):
-        self.player = Player((640, 360), self.all_sprites)
-
         tmx_map = load_pygame(join("data", "map.tmx"))
         # GROUND.
         Generic(
@@ -51,7 +50,7 @@ class Level:
             Generic(
                 pos=(x * TILE_SIZE, y * TILE_SIZE),
                 surf=surf,
-                groups=self.all_sprites,
+                groups=(self.all_sprites, self.collision_sprites),
             )
         # WATER.
         frames = import_folder_list("images", "water")
@@ -66,16 +65,32 @@ class Level:
             WildFlower(
                 pos=(obj.x, obj.y),
                 surf=obj.image,
-                groups=self.all_sprites,
+                groups=(self.all_sprites, self.collision_sprites),
             )
         # TREE.
         for obj in tmx_map.get_layer_by_name("Trees"):
             Tree(
                 pos=(obj.x, obj.y),
                 surf=obj.image,
-                groups=self.all_sprites,
+                groups=(self.all_sprites, self.collision_sprites),
                 name=obj.name,
             )
+        # CONSTRAINT TILE.
+        for x, y, surf in tmx_map.get_layer_by_name("Collision").tiles():
+            Generic(
+                pos=(x * TILE_SIZE, y * TILE_SIZE),
+                surf=surf,
+                groups=self.collision_sprites,
+            )
+        # PLAYER & INTERACTIVE OBJECT.
+        for obj in tmx_map.get_layer_by_name("Player"):
+            match obj.name:
+                case "Start":
+                    self.player = Player(
+                        pos=(obj.x, obj.y),
+                        groups=self.all_sprites,
+                        collision_sprites=self.collision_sprites,
+                    )
 
     def run(self, dt):
         self.all_sprites.update(dt)
