@@ -1,6 +1,7 @@
 from random import randint, choice
 import pygame
 from settings import *
+from timers import Timer
 
 
 class Generic(pygame.sprite.Sprite):
@@ -77,13 +78,41 @@ class Tree(Generic):
             if self.apple_sprites:
                 apple = choice(self.apple_sprites.sprites())
                 apple.kill()
+                # EFFECT.
+                Particle(
+                    pos=apple.rect.topleft,
+                    surf=apple.image,
+                    groups=self.groups()[0],
+                    z=LAYERS["fruit"],
+                )
             # CHECK DEATH.
             self.check_death()
 
     def check_death(self):
         if self.health <= 0:
             self.is_alive = False
+            # EFFECT.
+            Particle(
+                pos=self.rect.topleft,
+                surf=self.image,
+                groups=self.groups()[0],
+                z=LAYERS["fruit"],
+                duration=300,
+            )
             # CHANGE DISPLAY IMAGE.
             self.image = self.stump_surf
             self.rect = self.image.get_frect(midbottom=self.rect.midbottom)
             self.hitbox = self.rect.inflate(-10, -self.rect.height * 0.6)
+
+
+class Particle(Generic):
+    def __init__(self, pos, surf, groups, z, duration=200):
+        super().__init__(pos, surf, groups, z)
+        # SETUP.
+        self.image = pygame.mask.from_surface(surf).to_surface()
+        self.image.set_colorkey("black")
+        # TIMER.
+        self.life_timer = Timer(duration, self.kill, autostart=True)
+
+    def update(self, _):
+        self.life_timer.update()
