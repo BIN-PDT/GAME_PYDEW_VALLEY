@@ -1,3 +1,4 @@
+from random import randint, choice
 import pygame
 from settings import *
 
@@ -46,5 +47,43 @@ class WildFlower(Generic):
 
 
 class Tree(Generic):
-    def __init__(self, pos, surf, groups, name):
+    def __init__(self, pos, surf, groups, name, stump_surf, apple_surf):
         super().__init__(pos, surf, groups)
+        # TREE.
+        self.health = 5 + (randint(0, 2) if name == "small" else randint(2, 4))
+        self.is_alive = True
+        self.stump_surf = stump_surf
+        # FRUIT.
+        self.apple_surf = apple_surf
+        self.apple_offsets = APPLE_OFFSETS[name]
+        self.apple_sprites = pygame.sprite.Group()
+        self.spawn_apples()
+
+    def spawn_apples(self):
+        for offset_x, offset_y in self.apple_offsets:
+            if randint(0, 10) < 2:
+                pos = self.rect.left + offset_x, self.rect.top + offset_y
+                Generic(
+                    pos=pos,
+                    surf=self.apple_surf,
+                    groups=(self.apple_sprites, self.groups()[0]),
+                    z=LAYERS["fruit"],
+                )
+
+    def get_damage(self):
+        if self.is_alive:
+            self.health -= 1
+            # PICK AN APPLE.
+            if self.apple_sprites:
+                apple = choice(self.apple_sprites.sprites())
+                apple.kill()
+            # CHECK DEATH.
+            self.check_death()
+
+    def check_death(self):
+        if self.health <= 0:
+            self.is_alive = False
+            # CHANGE DISPLAY IMAGE.
+            self.image = self.stump_surf
+            self.rect = self.image.get_frect(midbottom=self.rect.midbottom)
+            self.hitbox = self.rect.inflate(-10, -self.rect.height * 0.6)

@@ -16,6 +16,7 @@ class Level:
         # GROUPS.
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
+        self.tree_sprites = pygame.sprite.Group()
         # SETUP.
         self.load_data()
         self.overlay = Overlay(self.player)
@@ -68,12 +69,17 @@ class Level:
                 groups=(self.all_sprites, self.collision_sprites),
             )
         # TREE.
+        stump_surfs = import_folder_dict("images", "stumps")
+        apple_surf = import_image("images", "fruit", "apple")
         for obj in tmx_map.get_layer_by_name("Trees"):
+            name = obj.name.lower()
             Tree(
                 pos=(obj.x, obj.y),
                 surf=obj.image,
-                groups=(self.all_sprites, self.collision_sprites),
-                name=obj.name,
+                groups=(self.all_sprites, self.collision_sprites, self.tree_sprites),
+                name=name,
+                stump_surf=stump_surfs[name],
+                apple_surf=apple_surf,
             )
         # CONSTRAINT TILE.
         for x, y, surf in tmx_map.get_layer_by_name("Collision").tiles():
@@ -90,6 +96,7 @@ class Level:
                         pos=(obj.x, obj.y),
                         groups=self.all_sprites,
                         collision_sprites=self.collision_sprites,
+                        tree_sprites=self.tree_sprites,
                     )
 
     def run(self, dt):

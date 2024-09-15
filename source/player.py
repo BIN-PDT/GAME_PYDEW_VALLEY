@@ -5,7 +5,7 @@ from timers import Timer
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites):
+    def __init__(self, pos, groups, collision_sprites, tree_sprites):
         super().__init__(groups)
         self.load_assets()
         # ANIMATION.
@@ -34,12 +34,26 @@ class Player(pygame.sprite.Sprite):
         # SEED.
         self.seed_index = 0
         self.selected_seed = SEED_CHOICES[self.seed_index]
+        # INTERACTION.
+        self.tree_sprites = tree_sprites
 
     def load_assets(self):
         self.animations = import_folder_dict("images", "character", subordinate=True)
 
+    @property
+    def target_pos(self):
+        return self.rect.center + PLAYER_TOOL_OFFSET[self.status.split("_")[0]]
+
     def use_tool(self):
-        pass
+        match self.selected_tool:
+            case "hoe":
+                pass
+            case "water":
+                pass
+            case "axe":
+                for sprite in self.tree_sprites.sprites():
+                    if sprite.rect.collidepoint(self.target_pos):
+                        sprite.get_damage()
 
     def use_seed(self):
         pass
