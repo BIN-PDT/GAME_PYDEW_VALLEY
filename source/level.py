@@ -80,6 +80,7 @@ class Level:
                 name=name,
                 stump_surf=stump_surfs[name],
                 apple_surf=apple_surf,
+                add_item_to_player=self.add_item_to_player,
             )
         # CONSTRAINT TILE.
         for x, y, surf in tmx_map.get_layer_by_name("Collision").tiles():
@@ -98,6 +99,9 @@ class Level:
                         collision_sprites=self.collision_sprites,
                         tree_sprites=self.tree_sprites,
                     )
+
+    def add_item_to_player(self, item):
+        self.player.inventory[item] += 1
 
     def run(self, dt):
         self.all_sprites.update(dt)

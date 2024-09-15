@@ -48,8 +48,12 @@ class WildFlower(Generic):
 
 
 class Tree(Generic):
-    def __init__(self, pos, surf, groups, name, stump_surf, apple_surf):
+    def __init__(
+        self, pos, surf, groups, name, stump_surf, apple_surf, add_item_to_player
+    ):
         super().__init__(pos, surf, groups)
+        # SETUP.
+        self.add_item_to_player = add_item_to_player
         # TREE.
         self.health = 5 + (randint(0, 2) if name == "small" else randint(2, 4))
         self.is_alive = True
@@ -85,6 +89,8 @@ class Tree(Generic):
                     groups=self.groups()[0],
                     z=LAYERS["fruit"],
                 )
+                # PLAYER INVENTORY.
+                self.add_item_to_player("apple")
             # CHECK DEATH.
             self.check_death()
 
@@ -103,6 +109,8 @@ class Tree(Generic):
             self.image = self.stump_surf
             self.rect = self.image.get_frect(midbottom=self.rect.midbottom)
             self.hitbox = self.rect.inflate(-10, -self.rect.height * 0.6)
+            # PLAYER INVENTORY.
+            self.add_item_to_player("wood")
 
 
 class Particle(Generic):
