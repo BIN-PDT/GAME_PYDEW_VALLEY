@@ -122,10 +122,12 @@ class Player(pygame.sprite.Sprite):
                 self.selected_seed = SEED_CHOICES[self.seed_index]
             # INTERACTION.
             if keys[pygame.K_RETURN]:
-                collided_sprite = pygame.sprite.spritecollide(
+                collided_sprites = pygame.sprite.spritecollide(
                     self, self.interaction_sprites, False
-                )[0]
-                if collided_sprite:
+                )
+                if collided_sprites:
+                    collided_sprite = collided_sprites[0]
+
                     if collided_sprite.name == "Bed":
                         self.status = "left_idle"
                         self.is_sleeping = True

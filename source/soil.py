@@ -63,17 +63,15 @@ class SoilLayer:
         for sprite in self.soil_sprites.sprites():
             sprite.kill()
 
-        for row_index, row in enumerate(self.grid):
-            for col_index, col in enumerate(row):
-                if "X" in col:
-                    # TILE OPTION.
-                    tile_type = self.type_soil_tile(row_index, col_index)
-
-                    SoilTile(
-                        pos=(col_index * TILE_SIZE, row_index * TILE_SIZE),
-                        surf=self.soil_surfs[tile_type],
-                        groups=(self.all_sprites, self.soil_sprites),
-                    )
+        for rect in self.farmable_rects:
+            row_index, col_index = rect.y // TILE_SIZE, rect.x // TILE_SIZE
+            if "X" in self.grid[row_index][col_index]:
+                tile_type = self.type_soil_tile(row_index, col_index)
+                SoilTile(
+                    pos=(col_index * TILE_SIZE, row_index * TILE_SIZE),
+                    surf=self.soil_surfs[tile_type],
+                    groups=(self.all_sprites, self.soil_sprites),
+                )
 
     def type_soil_tile(self, row_index, col_index):
         l = "X" in self.grid[row_index][col_index - 1]
@@ -120,28 +118,28 @@ class SoilLayer:
 
     # IRRIGATE.
     def irrigate(self, point):
-        for rect in self.farmable_rects:
-            if rect.collidepoint(point):
-                area = self.grid[rect.y // TILE_SIZE][rect.x // TILE_SIZE]
+        for sprite in self.soil_sprites.sprites():
+            if sprite.rect.collidepoint(point):
+                area = self.grid[sprite.rect.y // TILE_SIZE][sprite.rect.x // TILE_SIZE]
                 if "X" in area and "W" not in area:
                     area.append("W")
                     WaterTile(
-                        pos=rect.topleft,
+                        pos=sprite.rect.topleft,
                         surf=choice(self.water_surfs),
                         groups=(self.all_sprites, self.water_sprites),
                     )
                     break
 
     def irrigate_by_rain(self):
-        for row_index, row in enumerate(self.grid):
-            for col_index, col in enumerate(row):
-                if "X" in col and "W" not in col:
-                    col.append("W")
-                    WaterTile(
-                        pos=(col_index * TILE_SIZE, row_index * TILE_SIZE),
-                        surf=choice(self.water_surfs),
-                        groups=(self.all_sprites, self.water_sprites),
-                    )
+        for sprite in self.soil_sprites.sprites():
+            area = self.grid[sprite.rect.y // TILE_SIZE][sprite.rect.x // TILE_SIZE]
+            if "X" in area and "W" not in area:
+                area.append("W")
+                WaterTile(
+                    pos=sprite.rect.topleft,
+                    surf=choice(self.water_surfs),
+                    groups=(self.all_sprites, self.water_sprites),
+                )
 
     def absorb_water(self):
         for sprite in self.water_sprites.sprites():
@@ -235,3 +233,4 @@ class PlantTile(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(
                 midbottom=self.soil_sprite.rect.midbottom + self.offset_y
             )
+            self.hitbox = self.rect.inflate(-26, -self.rect.height * 0.4)

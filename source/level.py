@@ -126,7 +126,7 @@ class Level:
 
     def check_plant_harvest(self):
         for sprite in self.soil_layer.plant_sprites.sprites():
-            if sprite.is_harvestable and sprite.rect.colliderect(self.player.hitbox):
+            if sprite.is_harvestable and sprite.hitbox.colliderect(self.player.hitbox):
                 sprite.kill()
                 # REMOVE FROM SOIL GRID.
                 self.soil_layer.grid[sprite.rect.centery // TILE_SIZE][
