@@ -5,7 +5,9 @@ from timers import Timer
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites, tree_sprites):
+    def __init__(
+        self, pos, groups, collision_sprites, tree_sprites, interaction_sprites
+    ):
         super().__init__(groups)
         self.load_assets()
         # ANIMATION.
@@ -38,6 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.inventory = {"wood": 0, "apple": 0, "corn": 0, "tomato": 0}
         # INTERACTION.
         self.tree_sprites = tree_sprites
+        self.is_sleeping = False
+        self.interaction_sprites = interaction_sprites
 
     def load_assets(self):
         self.animations = import_folder_dict("images", "character", subordinate=True)
@@ -63,7 +67,7 @@ class Player(pygame.sprite.Sprite):
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if not self.timers["tool_use"].is_active:
+        if not self.timers["tool_use"].is_active and not self.is_sleeping:
             # HORIZONTAL MOVEMENT.
             if keys[pygame.K_LEFT]:
                 self.direction.x = -1
@@ -108,6 +112,17 @@ class Player(pygame.sprite.Sprite):
                 self.seed_index += 1
                 self.seed_index %= len(SEED_CHOICES)
                 self.selected_seed = SEED_CHOICES[self.seed_index]
+            # INTERACTION.
+            if keys[pygame.K_RETURN]:
+                collided_sprite = pygame.sprite.spritecollide(
+                    self, self.interaction_sprites, False
+                )[0]
+                if collided_sprite:
+                    if collided_sprite.name == "Bed":
+                        self.status = "left_idle"
+                        self.is_sleeping = True
+                    else:
+                        pass
 
     def get_status(self):
         # IDLE.

@@ -8,6 +8,7 @@ from groups import AllSprites
 from player import Player
 from overlay import Overlay
 from sprites import *
+from transition import Transition
 
 
 class Level:
@@ -17,9 +18,11 @@ class Level:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.tree_sprites = pygame.sprite.Group()
+        self.interaction_sprites = pygame.sprite.Group()
         # SETUP.
         self.load_data()
         self.overlay = Overlay(self.player)
+        self.transition = Transition(self.restart_day, self.player)
 
     def load_data(self):
         tmx_map = load_pygame(join("data", "map.tmx"))
@@ -98,12 +101,28 @@ class Level:
                         groups=self.all_sprites,
                         collision_sprites=self.collision_sprites,
                         tree_sprites=self.tree_sprites,
+                        interaction_sprites=self.interaction_sprites,
+                    )
+                case "Bed":
+                    Interaction(
+                        pos=(obj.x, obj.y),
+                        size=(obj.width, obj.height),
+                        groups=self.interaction_sprites,
+                        name=obj.name,
                     )
 
     def add_item_to_player(self, item):
         self.player.inventory[item] += 1
 
+    def restart_day(self):
+        # RESET TREE.
+        for tree in self.tree_sprites.sprites():
+            tree.spawn_apples()
+
     def run(self, dt):
         self.all_sprites.update(dt)
         self.all_sprites.draw(self.player)
         self.overlay.display()
+        # RESTART DAY.
+        if self.player.is_sleeping:
+            self.transition.play()

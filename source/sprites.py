@@ -65,6 +65,9 @@ class Tree(Generic):
         self.spawn_apples()
 
     def spawn_apples(self):
+        # REMOVE OLD SPRITES.
+        self.apple_sprites.empty()
+        # ADD NEW SPRITES.
         for offset_x, offset_y in self.apple_offsets:
             if randint(0, 10) < 2:
                 pos = self.rect.left + offset_x, self.rect.top + offset_y
@@ -124,3 +127,11 @@ class Particle(Generic):
 
     def update(self, _):
         self.life_timer.update()
+
+
+class Interaction(Generic):
+    def __init__(self, pos, size, groups, name):
+        surf = pygame.Surface(size)
+        super().__init__(pos, surf, groups)
+        # SETUP.
+        self.name = name
