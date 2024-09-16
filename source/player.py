@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite):
         tree_sprites,
         interaction_sprites,
         soil_layer,
+        toggle_shop,
     ):
         super().__init__(groups)
         self.load_assets()
@@ -43,11 +44,14 @@ class Player(pygame.sprite.Sprite):
         self.seed_index = 0
         self.selected_seed = SEED_CHOICES[self.seed_index]
         # INVENTORY.
-        self.inventory = {"wood": 0, "apple": 0, "corn": 0, "tomato": 0}
+        self.item_inventory = {"wood": 0, "apple": 0, "corn": 0, "tomato": 0}
+        self.seed_inventory = {"corn": 5, "tomato": 5}
+        self.money = 200
         # INTERACTION.
         self.tree_sprites = tree_sprites
         self.is_sleeping = False
         self.interaction_sprites = interaction_sprites
+        self.toggle_shop = toggle_shop
         # FARM SYSTEM.
         self.soil_layer = soil_layer
 
@@ -70,7 +74,9 @@ class Player(pygame.sprite.Sprite):
                         sprite.get_damage()
 
     def use_seed(self):
-        self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
+        if self.seed_inventory[self.selected_seed] > 0:
+            self.seed_inventory[self.selected_seed] -= 1
+            self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -127,12 +133,13 @@ class Player(pygame.sprite.Sprite):
                 )
                 if collided_sprites:
                     collided_sprite = collided_sprites[0]
-
+                    # INTERACT WITH BED.
                     if collided_sprite.name == "Bed":
                         self.status = "left_idle"
                         self.is_sleeping = True
+                    # INTERACT WITH TRADER.
                     else:
-                        pass
+                        self.toggle_shop()
 
     def get_status(self):
         # IDLE.

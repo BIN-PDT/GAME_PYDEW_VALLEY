@@ -12,6 +12,7 @@ from sprites import *
 from transition import Transition
 from soil import SoilLayer
 from weather import Rain, Sky
+from menu import Menu
 
 
 class Level:
@@ -32,6 +33,9 @@ class Level:
         self.is_raining = True
         self.soil_layer.is_raining = self.is_raining
         self.sky = Sky()
+        # SHOP.
+        self.shop_active = True
+        self.menu = Menu(self.player, self.toggle_shop)
 
     def load_data(self):
         tmx_map = load_pygame(join("data", "map.tmx"))
@@ -112,6 +116,7 @@ class Level:
                         tree_sprites=self.tree_sprites,
                         interaction_sprites=self.interaction_sprites,
                         soil_layer=self.soil_layer,
+                        toggle_shop=self.toggle_shop,
                     )
                 case "Bed":
                     Interaction(
@@ -120,13 +125,23 @@ class Level:
                         groups=self.interaction_sprites,
                         name=obj.name,
                     )
+                case "Trader":
+                    Interaction(
+                        pos=(obj.x, obj.y),
+                        size=(obj.width, obj.height),
+                        groups=self.interaction_sprites,
+                        name=obj.name,
+                    )
+
+    def toggle_shop(self):
+        self.shop_active = not self.shop_active
 
     def add_item_to_player(self, item):
-        self.player.inventory[item] += 1
+        self.player.item_inventory[item] += 1
 
     def check_plant_harvest(self):
         for sprite in self.soil_layer.plant_sprites.sprites():
-            if sprite.is_harvestable and sprite.hitbox.colliderect(self.player.hitbox):
+            if sprite.is_harvestable and sprite.rect.colliderect(self.player.hitbox):
                 sprite.kill()
                 # REMOVE FROM SOIL GRID.
                 self.soil_layer.grid[sprite.rect.centery // TILE_SIZE][
@@ -158,16 +173,20 @@ class Level:
             self.soil_layer.irrigate_by_rain()
 
     def run(self, dt):
-        self.all_sprites.update(dt)
         self.all_sprites.draw(self.player)
         self.overlay.display()
-        # RESTART DAY.
-        if self.player.is_sleeping:
-            self.transition.play()
+        # SHOP.
+        if self.shop_active:
+            self.menu.update()
+        else:
+            self.all_sprites.update(dt)
+            # SOIL LAYER.
+            self.check_plant_harvest()
+            # WEATHER.
+            if self.is_raining:
+                self.rain.update()
+            # RESTART DAY.
+            if self.player.is_sleeping:
+                self.transition.play()
         # DAY & NIGHT.
-        self.sky.display(dt)
-        # SOIL LAYER.
-        self.check_plant_harvest()
-        # WEATHER.
-        if self.is_raining:
-            self.rain.update()
+        self.sky.update(dt)

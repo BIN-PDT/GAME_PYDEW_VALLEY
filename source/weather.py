@@ -61,7 +61,7 @@ class Sky:
     def restart(self):
         self.color = [255, 255, 255]
 
-    def display(self, dt):
+    def update(self, dt):
         for index, value in enumerate(self.NIGHT_MARK):
             if self.color[index] > value:
                 self.color[index] -= 2 * dt
