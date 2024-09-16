@@ -51,7 +51,9 @@ class SoilLayer:
                     break
 
     def create_soil_tile(self):
-        self.soil_sprites.empty()
+        for sprite in self.soil_sprites.sprites():
+            sprite.kill()
+
         for row_index, row in enumerate(self.grid):
             for col_index, col in enumerate(row):
                 if "X" in col:
@@ -121,7 +123,9 @@ class SoilLayer:
                     break
 
     def absorb_water(self):
-        self.water_sprites.empty()
+        for sprite in self.water_sprites.sprites():
+            sprite.kill()
+
         for row in self.grid:
             for col in row:
                 if "W" in col:

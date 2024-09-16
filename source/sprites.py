@@ -65,9 +65,9 @@ class Tree(Generic):
         self.spawn_apples()
 
     def spawn_apples(self):
-        # REMOVE OLD SPRITES.
-        self.apple_sprites.empty()
-        # ADD NEW SPRITES.
+        for sprite in self.apple_sprites.sprites():
+            sprite.kill()
+
         for offset_x, offset_y in self.apple_offsets:
             if randint(0, 10) < 2:
                 pos = self.rect.left + offset_x, self.rect.top + offset_y
