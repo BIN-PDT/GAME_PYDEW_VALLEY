@@ -204,6 +204,7 @@ class PlantTile(pygame.sprite.Sprite):
         super().__init__(groups)
         # DATA.
         self.frames = frames
+        self.plant_type = plant_type
         self.soil_sprite = soil_sprite
         self.check_watered = check_watered
         # GROWTH.

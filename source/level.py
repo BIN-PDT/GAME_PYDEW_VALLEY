@@ -123,6 +123,24 @@ class Level:
     def add_item_to_player(self, item):
         self.player.inventory[item] += 1
 
+    def check_plant_harvest(self):
+        for sprite in self.soil_layer.plant_sprites.sprites():
+            if sprite.is_harvestable and sprite.rect.colliderect(self.player.hitbox):
+                sprite.kill()
+                # REMOVE FROM SOIL GRID.
+                self.soil_layer.grid[sprite.rect.centery // TILE_SIZE][
+                    sprite.rect.centerx // TILE_SIZE
+                ].remove("P")
+                # EFFECT.
+                Particle(
+                    pos=sprite.rect.topleft,
+                    surf=sprite.image,
+                    groups=self.all_sprites,
+                    z=LAYERS["main"],
+                )
+                # PLAYER INVENTORY.
+                self.add_item_to_player(sprite.plant_type)
+
     def restart_day(self):
         # SOIL LAYER.
         self.soil_layer.grow_plants()
@@ -140,9 +158,11 @@ class Level:
         self.all_sprites.update(dt)
         self.all_sprites.draw(self.player)
         self.overlay.display()
-        # WEATHER.
-        if self.is_raining:
-            self.rain.update()
         # RESTART DAY.
         if self.player.is_sleeping:
             self.transition.play()
+        # SOIL LAYER.
+        self.check_plant_harvest()
+        # WEATHER.
+        if self.is_raining:
+            self.rain.update()
