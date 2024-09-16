@@ -1,5 +1,6 @@
 import pygame
 from os.path import join
+from random import choice
 from pytmx.util_pygame import load_pygame
 from settings import *
 from supports import *
@@ -10,8 +11,10 @@ class SoilLayer:
         # GROUPS.
         self.all_sprites = all_sprites
         self.soil_sprites = pygame.sprite.Group()
+        self.water_sprites = pygame.sprite.Group()
         # ASSETS.
         self.soil_surfs = import_folder_dict("images", "soil")
+        self.water_surfs = import_folder_list("images", "soil_water")
         # SETUP.
         self.load_soil_grid()
         self.load_farmable_rects()
@@ -104,6 +107,26 @@ class SoilLayer:
         # DEFAULT.
         return "o"
 
+    def irrigate(self, point):
+        for rect in self.farmable_rects:
+            if rect.collidepoint(point):
+                area = self.grid[rect.y // TILE_SIZE][rect.x // TILE_SIZE]
+                if "X" in area and "W" not in area:
+                    area.append("W")
+                    WaterTile(
+                        pos=rect.topleft,
+                        surf=choice(self.water_surfs),
+                        groups=(self.all_sprites, self.water_sprites),
+                    )
+                    break
+
+    def absorb_water(self):
+        self.water_sprites.empty()
+        for row in self.grid:
+            for col in row:
+                if "W" in col:
+                    col.remove("W")
+
 
 class SoilTile(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
@@ -112,3 +135,12 @@ class SoilTile(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_rect(topleft=pos)
         self.z = LAYERS["soil"]
+
+
+class WaterTile(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups):
+        super().__init__(groups)
+        # SETUP.
+        self.image = surf
+        self.rect = self.image.get_rect(topleft=pos)
+        self.z = LAYERS["soil water"]

@@ -118,6 +118,8 @@ class Level:
         self.player.inventory[item] += 1
 
     def restart_day(self):
+        # SOIL LAYER.
+        self.soil_layer.absorb_water()
         # RESET TREE.
         for tree in self.tree_sprites.sprites():
             tree.spawn_apples()

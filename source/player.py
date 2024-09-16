@@ -63,7 +63,7 @@ class Player(pygame.sprite.Sprite):
             case "hoe":
                 self.soil_layer.excavate(self.target_pos)
             case "water":
-                pass
+                self.soil_layer.irrigate(self.target_pos)
             case "axe":
                 for sprite in self.tree_sprites.sprites():
                     if sprite.rect.collidepoint(self.target_pos):
