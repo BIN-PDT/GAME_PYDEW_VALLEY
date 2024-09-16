@@ -6,7 +6,13 @@ from timers import Timer
 
 class Player(pygame.sprite.Sprite):
     def __init__(
-        self, pos, groups, collision_sprites, tree_sprites, interaction_sprites
+        self,
+        pos,
+        groups,
+        collision_sprites,
+        tree_sprites,
+        interaction_sprites,
+        soil_layer,
     ):
         super().__init__(groups)
         self.load_assets()
@@ -42,6 +48,8 @@ class Player(pygame.sprite.Sprite):
         self.tree_sprites = tree_sprites
         self.is_sleeping = False
         self.interaction_sprites = interaction_sprites
+        # FARM SYSTEM.
+        self.soil_layer = soil_layer
 
     def load_assets(self):
         self.animations = import_folder_dict("images", "character", subordinate=True)
@@ -53,7 +61,7 @@ class Player(pygame.sprite.Sprite):
     def use_tool(self):
         match self.selected_tool:
             case "hoe":
-                pass
+                self.soil_layer.excavate(self.target_pos)
             case "water":
                 pass
             case "axe":

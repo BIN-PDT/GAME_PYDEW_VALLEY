@@ -9,6 +9,7 @@ from player import Player
 from overlay import Overlay
 from sprites import *
 from transition import Transition
+from soil import SoilLayer
 
 
 class Level:
@@ -20,6 +21,7 @@ class Level:
         self.tree_sprites = pygame.sprite.Group()
         self.interaction_sprites = pygame.sprite.Group()
         # SETUP.
+        self.soil_layer = SoilLayer(self.all_sprites)
         self.load_data()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.restart_day, self.player)
@@ -102,6 +104,7 @@ class Level:
                         collision_sprites=self.collision_sprites,
                         tree_sprites=self.tree_sprites,
                         interaction_sprites=self.interaction_sprites,
+                        soil_layer=self.soil_layer,
                     )
                 case "Bed":
                     Interaction(
