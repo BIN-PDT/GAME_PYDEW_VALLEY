@@ -11,7 +11,7 @@ class SoilLayer:
         self.all_sprites = all_sprites
         self.soil_sprites = pygame.sprite.Group()
         # ASSETS.
-        self.soil_surf = import_image("images", "soil", "o")
+        self.soil_surfs = import_folder_dict("images", "soil")
         # SETUP.
         self.load_soil_grid()
         self.load_farmable_rects()
@@ -52,11 +52,57 @@ class SoilLayer:
         for row_index, row in enumerate(self.grid):
             for col_index, col in enumerate(row):
                 if "X" in col:
+                    # TILE OPTION.
+                    tile_type = self.type_soil_tile(row_index, col_index)
+
                     SoilTile(
                         pos=(col_index * TILE_SIZE, row_index * TILE_SIZE),
-                        surf=self.soil_surf,
+                        surf=self.soil_surfs[tile_type],
                         groups=(self.all_sprites, self.soil_sprites),
                     )
+
+    def type_soil_tile(self, row_index, col_index):
+        l = "X" in self.grid[row_index][col_index - 1]
+        r = "X" in self.grid[row_index][col_index + 1]
+        t = "X" in self.grid[row_index - 1][col_index]
+        b = "X" in self.grid[row_index + 1][col_index]
+        # ALL SIDES.
+        if all((l, r, t, b)):
+            return "x"
+        # HORIZONTAL SIDE ONLY.
+        if l and not any((r, t, b)):
+            return "r"
+        if r and not any((l, t, b)):
+            return "l"
+        if all((l, r)) and not any((t, b)):
+            return "lr"
+        # VERTICAL SIDE ONLY.
+        if t and not any((l, r, b)):
+            return "b"
+        if b and not any((l, r, t)):
+            return "t"
+        if all((t, b)) and not any((l, r)):
+            return "tb"
+        # CORNER.
+        if all((l, b)) and not any((r, t)):
+            return "tr"
+        if all((l, t)) and not any((r, b)):
+            return "br"
+        if all((r, b)) and not any((l, t)):
+            return "tl"
+        if all((r, t)) and not any((l, b)):
+            return "bl"
+        # T-SHAPE.
+        if all((l, r, b)) and not t:
+            return "lrt"
+        if all((l, r, t)) and not b:
+            return "lrb"
+        if all((l, t, b)) and not r:
+            return "tbl"
+        if all((r, t, b)) and not l:
+            return "tbr"
+        # DEFAULT.
+        return "o"
 
 
 class SoilTile(pygame.sprite.Sprite):
