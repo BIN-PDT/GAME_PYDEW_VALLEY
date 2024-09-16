@@ -34,7 +34,7 @@ class Level:
         self.soil_layer.is_raining = self.is_raining
         self.sky = Sky()
         # SHOP.
-        self.shop_active = True
+        self.shop_active = False
         self.menu = Menu(self.player, self.toggle_shop)
 
     def load_data(self):
