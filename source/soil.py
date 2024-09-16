@@ -7,14 +7,17 @@ from supports import *
 
 
 class SoilLayer:
-    def __init__(self, all_sprites):
+    def __init__(self, all_sprites, collision_sprites):
         # GROUPS.
         self.all_sprites = all_sprites
+        self.collision_sprites = collision_sprites
         self.soil_sprites = pygame.sprite.Group()
         self.water_sprites = pygame.sprite.Group()
+        self.plant_sprites = pygame.sprite.Group()
         # ASSETS.
         self.soil_surfs = import_folder_dict("images", "soil")
         self.water_surfs = import_folder_list("images", "soil_water")
+        self.fruit_surfs = import_folder_dict("images", "fruit", subordinate=True)
         # SETUP.
         self.load_soil_grid()
         self.load_farmable_rects()
@@ -43,6 +46,7 @@ class SoilLayer:
                     rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
                     self.farmable_rects.append(rect)
 
+    # EXCAVATE.
     def excavate(self, point):
         for rect in self.farmable_rects:
             if rect.collidepoint(point):
@@ -114,6 +118,7 @@ class SoilLayer:
         # DEFAULT.
         return "o"
 
+    # IRRIGATE.
     def irrigate(self, point):
         for rect in self.farmable_rects:
             if rect.collidepoint(point):
@@ -147,6 +152,34 @@ class SoilLayer:
                 if "W" in col:
                     col.remove("W")
 
+    def check_watered(self, pos):
+        area = self.grid[pos[1] // TILE_SIZE][pos[0] // TILE_SIZE]
+        return "W" in area
+
+    # PLANT.
+    def plant_seed(self, point, seed_type):
+        for sprite in self.soil_sprites.sprites():
+            if sprite.rect.collidepoint(point):
+                area = self.grid[sprite.rect.y // TILE_SIZE][sprite.rect.x // TILE_SIZE]
+                if "X" in area and "P" not in area:
+                    area.append("P")
+                    PlantTile(
+                        frames=self.fruit_surfs[seed_type],
+                        groups=(
+                            self.all_sprites,
+                            self.plant_sprites,
+                            self.collision_sprites,
+                        ),
+                        plant_type=seed_type,
+                        soil_sprite=sprite,
+                        check_watered=self.check_watered,
+                    )
+                    break
+
+    def grow_plants(self):
+        for sprite in self.plant_sprites.sprites():
+            sprite.grow()
+
 
 class SoilTile(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
@@ -164,3 +197,40 @@ class WaterTile(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_rect(topleft=pos)
         self.z = LAYERS["soil water"]
+
+
+class PlantTile(pygame.sprite.Sprite):
+    def __init__(self, frames, groups, plant_type, soil_sprite, check_watered):
+        super().__init__(groups)
+        # DATA.
+        self.frames = frames
+        self.soil_sprite = soil_sprite
+        self.check_watered = check_watered
+        # GROWTH.
+        self.MAX_AGE = len(self.frames) - 1
+        self.age, self.speed = 0, GROW_SPEED[plant_type]
+        self.is_harvestable = False
+        # SETUP.
+        self.image = self.frames[self.age]
+        self.offset_y = Vector2(0, -16 if plant_type == "corn" else -8)
+        self.rect = self.image.get_rect(
+            midbottom=self.soil_sprite.rect.midbottom + self.offset_y
+        )
+        self.z = LAYERS["ground plant"]
+
+    def grow(self):
+        if self.check_watered(self.rect.center):
+            self.age += self.speed
+            # BECOME OBSTACLE.
+            if self.age >= 1:
+                self.z = LAYERS["main"]
+                self.hitbox = self.rect.inflate(-26, -self.rect.height * 0.4)
+            # CHECK HARVESTABLE.
+            if self.age >= self.MAX_AGE:
+                self.age = self.MAX_AGE
+                self.is_harvestable = True
+            # UPDATE.
+            self.image = self.frames[int(self.age)]
+            self.rect = self.image.get_rect(
+                midbottom=self.soil_sprite.rect.midbottom + self.offset_y
+            )

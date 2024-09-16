@@ -23,7 +23,7 @@ class Level:
         self.tree_sprites = pygame.sprite.Group()
         self.interaction_sprites = pygame.sprite.Group()
         # SETUP.
-        self.soil_layer = SoilLayer(self.all_sprites)
+        self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
         self.load_data()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.restart_day, self.player)
@@ -125,6 +125,7 @@ class Level:
 
     def restart_day(self):
         # SOIL LAYER.
+        self.soil_layer.grow_plants()
         self.soil_layer.absorb_water()
         # WEATHER.
         self.is_raining = randint(0, 10) > 3

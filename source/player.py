@@ -70,7 +70,7 @@ class Player(pygame.sprite.Sprite):
                         sprite.get_damage()
 
     def use_seed(self):
-        pass
+        self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
 
     def input(self):
         keys = pygame.key.get_pressed()
