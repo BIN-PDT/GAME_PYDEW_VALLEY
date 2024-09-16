@@ -23,6 +23,13 @@ class Level:
         self.collision_sprites = pygame.sprite.Group()
         self.tree_sprites = pygame.sprite.Group()
         self.interaction_sprites = pygame.sprite.Group()
+        # AUDIO.
+        self.sounds = import_audio("audio")
+        self.sounds["bg"].set_volume(0.5)
+        self.sounds["success"].set_volume(0.3)
+        self.sounds["hoe"].set_volume(0.1)
+        self.sounds["water"].set_volume(0.2)
+        self.sounds["plant"].set_volume(0.2)
         # SETUP.
         self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
         self.load_data()
@@ -36,6 +43,8 @@ class Level:
         # SHOP.
         self.shop_active = False
         self.menu = Menu(self.player, self.toggle_shop)
+        # BACKGROUND MUSIC.
+        self.sounds["bg"].play(-1)
 
     def load_data(self):
         tmx_map = load_pygame(join("data", "map.tmx"))
@@ -97,6 +106,7 @@ class Level:
                 stump_surf=stump_surfs[name],
                 apple_surf=apple_surf,
                 add_item_to_player=self.add_item_to_player,
+                axe_sound=self.sounds["axe"],
             )
         # CONSTRAINT TILE.
         for x, y, surf in tmx_map.get_layer_by_name("Collision").tiles():
@@ -117,6 +127,9 @@ class Level:
                         interaction_sprites=self.interaction_sprites,
                         soil_layer=self.soil_layer,
                         toggle_shop=self.toggle_shop,
+                        hoe_sound=self.sounds["hoe"],
+                        water_sound=self.sounds["water"],
+                        plant_sound=self.sounds["plant"],
                     )
                 case "Bed":
                     Interaction(
@@ -138,6 +151,8 @@ class Level:
 
     def add_item_to_player(self, item):
         self.player.item_inventory[item] += 1
+        # PLAY SOUND.
+        self.sounds["success"].play()
 
     def check_plant_harvest(self):
         for sprite in self.soil_layer.plant_sprites.sprites():

@@ -49,11 +49,20 @@ class WildFlower(Generic):
 
 class Tree(Generic):
     def __init__(
-        self, pos, surf, groups, name, stump_surf, apple_surf, add_item_to_player
+        self,
+        pos,
+        surf,
+        groups,
+        name,
+        stump_surf,
+        apple_surf,
+        add_item_to_player,
+        axe_sound,
     ):
         super().__init__(pos, surf, groups)
         # SETUP.
         self.add_item_to_player = add_item_to_player
+        self.axe_sound = axe_sound
         # TREE.
         self.health = 5 + (randint(0, 2) if name == "small" else randint(2, 4))
         self.is_alive = True
@@ -81,6 +90,8 @@ class Tree(Generic):
     def get_damage(self):
         if self.is_alive:
             self.health -= 1
+            # PLAY SOUND.
+            self.axe_sound.play()
             # PICK AN APPLE.
             if self.apple_sprites:
                 apple = choice(self.apple_sprites.sprites())

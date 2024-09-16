@@ -1,6 +1,7 @@
 from os import walk
 from os.path import join
 from pygame.image import load
+from pygame.mixer import Sound
 
 
 def import_image(*path, alpha=True, format="png"):
@@ -31,3 +32,12 @@ def import_folder_dict(*path, subordinate=False):
                 surf = load(full_path).convert_alpha()
                 frames[file_name.split(".")[0]] = surf
     return frames
+
+
+def import_audio(*path):
+    sounds = {}
+    for folder_path, _, file_names in walk(join(*path)):
+        for file_name in file_names:
+            full_path = join(folder_path, file_name)
+            sounds[file_name.split(".")[0]] = Sound(full_path)
+    return sounds

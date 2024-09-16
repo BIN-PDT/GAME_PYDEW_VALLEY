@@ -14,6 +14,9 @@ class Player(pygame.sprite.Sprite):
         interaction_sprites,
         soil_layer,
         toggle_shop,
+        hoe_sound,
+        water_sound,
+        plant_sound,
     ):
         super().__init__(groups)
         self.load_assets()
@@ -54,6 +57,10 @@ class Player(pygame.sprite.Sprite):
         self.toggle_shop = toggle_shop
         # FARM SYSTEM.
         self.soil_layer = soil_layer
+        # AUDIO.
+        self.hoe_sound = hoe_sound
+        self.water_sound = water_sound
+        self.plant_sound = plant_sound
 
     def load_assets(self):
         self.animations = import_folder_dict("images", "character", subordinate=True)
@@ -66,8 +73,12 @@ class Player(pygame.sprite.Sprite):
         match self.selected_tool:
             case "hoe":
                 self.soil_layer.excavate(self.target_pos)
+                # PLAY SOUND.
+                self.hoe_sound.play()
             case "water":
                 self.soil_layer.irrigate(self.target_pos)
+                # PLAY SOUND.
+                self.water_sound.play()
             case "axe":
                 for sprite in self.tree_sprites.sprites():
                     if sprite.rect.collidepoint(self.target_pos):
@@ -77,6 +88,8 @@ class Player(pygame.sprite.Sprite):
         if self.seed_inventory[self.selected_seed] > 0:
             self.seed_inventory[self.selected_seed] -= 1
             self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
+            # PLAY SOUND.
+            self.plant_sound.play()
 
     def input(self):
         keys = pygame.key.get_pressed()
