@@ -220,10 +220,6 @@ class PlantTile(pygame.sprite.Sprite):
     def grow(self):
         if self.check_watered(self.rect.center):
             self.age += self.speed
-            # BECOME OBSTACLE.
-            if self.age >= 1:
-                self.z = LAYERS["main"]
-                self.hitbox = self.rect.inflate(-26, -self.rect.height * 0.4)
             # CHECK HARVESTABLE.
             if self.age >= self.MAX_AGE:
                 self.age = self.MAX_AGE
@@ -233,4 +229,7 @@ class PlantTile(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(
                 midbottom=self.soil_sprite.rect.midbottom + self.offset_y
             )
-            self.hitbox = self.rect.inflate(-26, -self.rect.height * 0.4)
+            # BECOME OBSTACLE.
+            if self.age >= 1:
+                self.z = LAYERS["main"]
+                self.hitbox = self.rect.inflate(-26, -self.rect.height * 0.4)
