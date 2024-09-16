@@ -1,3 +1,4 @@
+import pygame
 from random import randint, choice
 from settings import *
 from supports import *
@@ -47,3 +48,23 @@ class Rain:
     def update(self):
         self.create_rain_floor()
         self.create_rain_drops()
+
+
+class Sky:
+    def __init__(self):
+        self.screen = pygame.display.get_surface()
+        # SETUP.
+        self.image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.NIGHT_MARK = (38, 101, 189)
+        self.color = [255, 255, 255]
+
+    def restart(self):
+        self.color = [255, 255, 255]
+
+    def display(self, dt):
+        for index, value in enumerate(self.NIGHT_MARK):
+            if self.color[index] > value:
+                self.color[index] -= 2 * dt
+
+        self.image.fill(self.color)
+        self.screen.blit(self.image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
