@@ -1,5 +1,6 @@
 import pygame
 from os.path import join
+from random import randint
 from pytmx.util_pygame import load_pygame
 from settings import *
 from supports import *
@@ -10,6 +11,7 @@ from overlay import Overlay
 from sprites import *
 from transition import Transition
 from soil import SoilLayer
+from weather import Rain
 
 
 class Level:
@@ -25,6 +27,10 @@ class Level:
         self.load_data()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.restart_day, self.player)
+        # WEATHER.
+        self.rain = Rain(self.all_sprites)
+        self.is_raining = True
+        self.soil_layer.is_raining = self.is_raining
 
     def load_data(self):
         tmx_map = load_pygame(join("data", "map.tmx"))
@@ -120,6 +126,11 @@ class Level:
     def restart_day(self):
         # SOIL LAYER.
         self.soil_layer.absorb_water()
+        # WEATHER.
+        self.is_raining = randint(0, 10) > 3
+        self.soil_layer.is_raining = self.is_raining
+        if self.is_raining:
+            self.soil_layer.irrigate_by_rain()
         # RESET TREE.
         for tree in self.tree_sprites.sprites():
             tree.spawn_apples()
@@ -128,6 +139,9 @@ class Level:
         self.all_sprites.update(dt)
         self.all_sprites.draw(self.player)
         self.overlay.display()
+        # WEATHER.
+        if self.is_raining:
+            self.rain.update()
         # RESTART DAY.
         if self.player.is_sleeping:
             self.transition.play()

@@ -18,6 +18,8 @@ class SoilLayer:
         # SETUP.
         self.load_soil_grid()
         self.load_farmable_rects()
+        # WEATHER.
+        self.is_raining = None
 
     def load_soil_grid(self):
         # CREATE GRID.
@@ -48,6 +50,9 @@ class SoilLayer:
                 if "F" in area and "X" not in area:
                     area.append("X")
                     self.create_soil_tile()
+                    # WATERED IF BEING RAINING.
+                    if self.is_raining:
+                        self.irrigate(point)
                     break
 
     def create_soil_tile(self):
@@ -121,6 +126,17 @@ class SoilLayer:
                         groups=(self.all_sprites, self.water_sprites),
                     )
                     break
+
+    def irrigate_by_rain(self):
+        for row_index, row in enumerate(self.grid):
+            for col_index, col in enumerate(row):
+                if "X" in col and "W" not in col:
+                    col.append("W")
+                    WaterTile(
+                        pos=(col_index * TILE_SIZE, row_index * TILE_SIZE),
+                        surf=choice(self.water_surfs),
+                        groups=(self.all_sprites, self.water_sprites),
+                    )
 
     def absorb_water(self):
         for sprite in self.water_sprites.sprites():
