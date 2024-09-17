@@ -9,7 +9,7 @@ class Generic(pygame.sprite.Sprite):
         super().__init__(groups)
         # SETUP.
         self.image = surf
-        self.rect = self.image.get_frect(topleft=pos)
+        self.rect = self.image.get_rect(topleft=pos)
         self.z = z
         # COLLISION.
         self.hitbox = self.rect.inflate(
@@ -44,7 +44,7 @@ class WildFlower(Generic):
     def __init__(self, pos, surf, groups):
         super().__init__(pos, surf, groups)
         # COLLISION.
-        self.hitbox = self.rect.inflate((-20, -self.rect.height * 0.9))
+        self.hitbox = self.rect.inflate(-20, -self.rect.height * 0.9)
 
 
 class Tree(Generic):

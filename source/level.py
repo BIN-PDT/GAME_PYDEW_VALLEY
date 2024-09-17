@@ -34,10 +34,10 @@ class Level:
         self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
         self.load_data()
         self.overlay = Overlay(self.player)
-        self.transition = Transition(self.restart_day, self.player)
+        self.transition = Transition(self.player, self.restart_day)
         # WEATHER.
         self.rain = Rain(self.all_sprites)
-        self.is_raining = True
+        self.is_raining = randint(0, 10) > 5
         self.soil_layer.is_raining = self.is_raining
         self.sky = Sky()
         # SHOP.
@@ -182,26 +182,26 @@ class Level:
         self.soil_layer.grow_plants()
         self.soil_layer.absorb_water()
         # WEATHER.
-        self.is_raining = randint(0, 10) > 3
+        self.is_raining = randint(0, 10) > 5
         self.soil_layer.is_raining = self.is_raining
         if self.is_raining:
             self.soil_layer.irrigate_by_rain()
 
     def run(self, dt):
-        self.all_sprites.draw(self.player)
+        self.all_sprites.draw(self.player.rect.center)
         self.overlay.display()
         # SHOP.
         if self.shop_active:
             self.menu.update()
         else:
             self.all_sprites.update(dt)
-            # SOIL LAYER.
+            # HARVEST.
             self.check_plant_harvest()
             # WEATHER.
             if self.is_raining:
                 self.rain.update()
             # RESTART DAY.
             if self.player.is_sleeping:
-                self.transition.play()
+                self.transition.display()
         # DAY & NIGHT.
-        self.sky.update(dt)
+        self.sky.display(dt)

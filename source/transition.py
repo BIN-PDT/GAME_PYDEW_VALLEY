@@ -3,7 +3,7 @@ from settings import *
 
 
 class Transition:
-    def __init__(self, restart_day, player):
+    def __init__(self, player, restart_day):
         self.screen = pg.display.get_surface()
         # SETUP.
         self.image = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -12,7 +12,7 @@ class Transition:
         self.player = player
         self.restart_day = restart_day
 
-    def play(self):
+    def display(self):
         self.color += self.speed
         # GO TO BED.
         if self.color < 0:

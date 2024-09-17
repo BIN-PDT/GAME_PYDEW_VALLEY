@@ -31,17 +31,17 @@ class Rain:
         # GROUP.
         self.all_sprites = all_sprites
         # SETUP.
-        self.map_size = import_image("images", "world", "ground").get_size()
+        self.MAP_SIZE = import_image("images", "world", "ground").get_size()
         self.rains_drops_surfs = import_folder_list("images", "rain", "drops")
         self.rains_floor_surfs = import_folder_list("images", "rain", "floor")
 
     def create_rain_floor(self):
-        pos = randint(0, self.map_size[0]), randint(0, self.map_size[1])
+        pos = randint(0, self.MAP_SIZE[0]), randint(0, self.MAP_SIZE[1])
         surf = choice(self.rains_floor_surfs)
         Drop(pos, surf, self.all_sprites, LAYERS["rain floor"], False)
 
     def create_rain_drops(self):
-        pos = randint(0, self.map_size[0]), randint(0, self.map_size[1])
+        pos = randint(0, self.MAP_SIZE[0]), randint(0, self.MAP_SIZE[1])
         surf = choice(self.rains_drops_surfs)
         Drop(pos, surf, self.all_sprites, LAYERS["rain drops"], True)
 
@@ -61,7 +61,7 @@ class Sky:
     def restart(self):
         self.color = [255, 255, 255]
 
-    def update(self, dt):
+    def display(self, dt):
         for index, value in enumerate(self.NIGHT_MARK):
             if self.color[index] > value:
                 self.color[index] -= 2 * dt

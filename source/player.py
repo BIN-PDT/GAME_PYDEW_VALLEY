@@ -19,20 +19,20 @@ class Player(pygame.sprite.Sprite):
         plant_sound,
     ):
         super().__init__(groups)
-        self.load_assets()
         # ANIMATION.
+        self.animations = import_folder_dict("images", "character", subordinate=True)
         self.status = "down_idle"
         self.frame_index = 0
-        self.ANIMATION_SPEED = 4
         # SETUP.
         self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_frect(center=pos)
         self.z = LAYERS["main"]
         # MOVEMENT.
-        self.direction, self.speed = Vector2(), 200
+        self.direction = Vector2()
+        self.speed = 200
         # COLLISION.
         self.collision_sprites = collision_sprites
-        self.hitbox = self.rect.inflate((-126, -70))
+        self.hitbox = self.rect.inflate(-126, -70)
         # TIMER.
         self.timers = {
             "tool_use": Timer(350, self.use_tool),
@@ -52,18 +52,17 @@ class Player(pygame.sprite.Sprite):
         self.money = 200
         # INTERACTION.
         self.tree_sprites = tree_sprites
-        self.is_sleeping = False
         self.interaction_sprites = interaction_sprites
-        self.toggle_shop = toggle_shop
-        # FARM SYSTEM.
+        # RESTART DAY.
+        self.is_sleeping = False
+        # SOIL PLAYER.
         self.soil_layer = soil_layer
+        # SHOP.
+        self.toggle_shop = toggle_shop
         # AUDIO.
         self.hoe_sound = hoe_sound
         self.water_sound = water_sound
         self.plant_sound = plant_sound
-
-    def load_assets(self):
-        self.animations = import_folder_dict("images", "character", subordinate=True)
 
     @property
     def target_pos(self):
@@ -92,9 +91,8 @@ class Player(pygame.sprite.Sprite):
             self.plant_sound.play()
 
     def input(self):
-        keys = pygame.key.get_pressed()
-
         if not self.timers["tool_use"].is_active and not self.is_sleeping:
+            keys = pygame.key.get_pressed()
             # HORIZONTAL MOVEMENT.
             if keys[pygame.K_LEFT]:
                 self.direction.x = -1
@@ -157,28 +155,27 @@ class Player(pygame.sprite.Sprite):
     def get_status(self):
         # IDLE.
         if not self.direction:
-            self.status = self.status.split("_")[0] + "_idle"
-        # TOOL USE.
+            self.status = f"{self.status.split('_')[0]}_idle"
+        # USE TOOL.
         if self.timers["tool_use"].is_active:
-            self.status = self.status.split("_")[0] + f"_{self.selected_tool}"
+            self.status = f"{self.status.split('_')[0]}_{self.selected_tool}"
 
     def collide(self, direction):
-        for sprite in filter(
-            lambda sprite: hasattr(sprite, "hitbox"), self.collision_sprites.sprites()
-        ):
-            if self.hitbox.colliderect(sprite.hitbox):
-                if direction == "horizontal":
-                    if self.direction.x < 0:
-                        self.hitbox.left = sprite.hitbox.right
-                    elif self.direction.x > 0:
-                        self.hitbox.right = sprite.hitbox.left
-                    self.rect.centerx = self.hitbox.centerx
-                else:
-                    if self.direction.y < 0:
-                        self.hitbox.top = sprite.hitbox.bottom
-                    elif self.direction.y > 0:
-                        self.hitbox.bottom = sprite.hitbox.top
-                    self.rect.centery = self.hitbox.centery
+        for sprite in self.collision_sprites:
+            if hasattr(sprite, "hitbox"):
+                if self.hitbox.colliderect(sprite.hitbox):
+                    if direction == "horizontal":
+                        if self.direction.x < 0:
+                            self.hitbox.left = sprite.hitbox.right
+                        elif self.direction.x > 0:
+                            self.hitbox.right = sprite.hitbox.left
+                        self.rect.centerx = self.hitbox.centerx
+                    else:
+                        if self.direction.y < 0:
+                            self.hitbox.top = sprite.hitbox.bottom
+                        elif self.direction.y > 0:
+                            self.hitbox.bottom = sprite.hitbox.top
+                        self.rect.centery = self.hitbox.centery
 
     def move(self, dt):
         # NORMALIZE MOVEMENT.
@@ -194,11 +191,11 @@ class Player(pygame.sprite.Sprite):
         self.collide("vertical")
 
     def animate(self, dt):
-        ANIMATION = self.animations[self.status]
-        self.frame_index += self.ANIMATION_SPEED * dt
+        animation = self.animations[self.status]
+        self.frame_index += 4 * dt
+        self.frame_index %= len(animation)
 
-        self.frame_index %= len(ANIMATION)
-        self.image = ANIMATION[int(self.frame_index)]
+        self.image = animation[int(self.frame_index)]
 
     def update_timers(self):
         for timer in self.timers.values():
