@@ -54,7 +54,7 @@ class Menu:
             self.selected_index -= 1
         elif keys[pygame.K_DOWN]:
             self.selected_index += 1
-        elif keys[pygame.K_SPACE]:
+        elif self.player.in_shop and keys[pygame.K_SPACE]:
             # SELL.
             selected_option = self.OPTIONS[self.selected_index]
             if self.selected_index <= self.SELLABLE_BORDER:
@@ -113,13 +113,16 @@ class Menu:
             # BODER.
             pygame.draw.rect(self.screen, "black", bg_rect, 5, 5)
             # BUY/SELL INFORMATION.
-            info_surf = (
-                self.sell_text_surf
-                if self.selected_index <= self.SELLABLE_BORDER
-                else self.buy_text_surf
-            )
-            info_rect = info_surf.get_rect(midleft=bg_rect.midleft + Vector2(180, 0))
-            self.screen.blit(info_surf, info_rect)
+            if self.player.in_shop:
+                info_surf = (
+                    self.sell_text_surf
+                    if self.selected_index <= self.SELLABLE_BORDER
+                    else self.buy_text_surf
+                )
+                info_rect = info_surf.get_rect(
+                    midleft=bg_rect.midleft + Vector2(180, 0)
+                )
+                self.screen.blit(info_surf, info_rect)
 
     def update(self):
         self.input()

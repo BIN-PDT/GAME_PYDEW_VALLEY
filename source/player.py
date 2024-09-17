@@ -58,6 +58,7 @@ class Player(pygame.sprite.Sprite):
         # SOIL PLAYER.
         self.soil_layer = soil_layer
         # SHOP.
+        self.in_shop = False
         self.toggle_shop = toggle_shop
         # AUDIO.
         self.hoe_sound = hoe_sound
@@ -150,7 +151,11 @@ class Player(pygame.sprite.Sprite):
                         self.is_sleeping = True
                     # INTERACT WITH TRADER.
                     else:
+                        self.in_shop = True
                         self.toggle_shop()
+                else:
+                    self.in_shop = False
+                    self.toggle_shop()
 
     def get_status(self):
         # IDLE.
