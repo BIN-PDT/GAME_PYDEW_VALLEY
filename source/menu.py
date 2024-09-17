@@ -47,7 +47,7 @@ class Menu:
     def input(self):
         keys = pygame.key.get_just_pressed()
         # CLOSE.
-        if keys[pygame.K_ESCAPE]:
+        if keys[pygame.K_RETURN]:
             self.toggle_shop()
         # SWITCH.
         if keys[pygame.K_UP]:

@@ -4,6 +4,7 @@ from random import randint
 from pytmx.util_pygame import load_pygame
 from settings import *
 from supports import *
+from timers import Timer
 
 from groups import AllSprites
 from player import Player
@@ -30,6 +31,8 @@ class Level:
         self.sounds["hoe"].set_volume(0.1)
         self.sounds["water"].set_volume(0.2)
         self.sounds["plant"].set_volume(0.2)
+        # TIMER.
+        self.shop_timer = Timer(250)
         # SETUP.
         self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
         self.load_data()
@@ -147,7 +150,9 @@ class Level:
                     )
 
     def toggle_shop(self):
-        self.shop_active = not self.shop_active
+        if not self.shop_timer.is_active:
+            self.shop_timer.activate()
+            self.shop_active = not self.shop_active
 
     def add_item_to_player(self, item):
         self.player.item_inventory[item] += 1
@@ -188,6 +193,8 @@ class Level:
             self.soil_layer.irrigate_by_rain()
 
     def run(self, dt):
+        self.shop_timer.update()
+
         self.all_sprites.draw(self.player.rect.center)
         self.overlay.display()
         # SHOP.
