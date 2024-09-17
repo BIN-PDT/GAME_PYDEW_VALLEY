@@ -172,7 +172,8 @@ class SoilLayer:
                         soil_sprite=sprite,
                         check_watered=self.check_watered,
                     )
-                    break
+                    return True
+        return False
 
     def grow_plants(self):
         for sprite in self.plant_sprites.sprites():

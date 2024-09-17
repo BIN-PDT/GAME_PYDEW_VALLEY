@@ -86,10 +86,10 @@ class Player(pygame.sprite.Sprite):
 
     def use_seed(self):
         if self.seed_inventory[self.selected_seed] > 0:
-            self.seed_inventory[self.selected_seed] -= 1
-            self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
-            # PLAY SOUND.
-            self.plant_sound.play()
+            if self.soil_layer.plant_seed(self.target_pos, self.selected_seed):
+                self.seed_inventory[self.selected_seed] -= 1
+                # PLAY SOUND.
+                self.plant_sound.play()
 
     def input(self):
         if not self.timers["tool_use"].is_active and not self.is_sleeping:
