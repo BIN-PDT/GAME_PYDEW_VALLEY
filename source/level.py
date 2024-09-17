@@ -39,10 +39,11 @@ class Level:
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.player, self.restart_day)
         # WEATHER.
+        self.sky = Sky()
         self.rain = Rain(self.all_sprites)
         self.is_raining = randint(0, 10) > 5
+        self.sky.is_raining = self.is_raining
         self.soil_layer.is_raining = self.is_raining
-        self.sky = Sky()
         # SHOP.
         self.shop_active = False
         self.menu = Menu(self.player, self.toggle_shop)
@@ -189,6 +190,7 @@ class Level:
         # WEATHER.
         self.is_raining = randint(0, 10) > 5
         self.soil_layer.is_raining = self.is_raining
+        self.sky.is_raining = self.is_raining
         if self.is_raining:
             self.soil_layer.irrigate_by_rain()
 
@@ -197,6 +199,8 @@ class Level:
 
         self.all_sprites.draw(self.player.rect.center)
         self.overlay.display()
+        # DAY & NIGHT.
+        self.sky.display(dt)
         # SHOP.
         if self.shop_active:
             self.menu.update()
@@ -210,5 +214,3 @@ class Level:
             # RESTART DAY.
             if self.player.is_sleeping:
                 self.transition.display()
-        # DAY & NIGHT.
-        self.sky.display(dt)

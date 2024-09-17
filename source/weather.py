@@ -53,18 +53,48 @@ class Rain:
 class Sky:
     def __init__(self):
         self.screen = pygame.display.get_surface()
+        # ASSETS.
+        self.load_assets()
+        self.frame_index = 0
+        self.status = None
         # SETUP.
         self.image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.NIGHT_MARK = (38, 101, 189)
         self.color = [255, 255, 255]
 
+    @property
+    def is_raining(self):
+        return self.status
+
+    @is_raining.setter
+    def is_raining(self, value):
+        self.status = "rainy" if value else "sunny"
+
+    def load_assets(self):
+        self.animations = import_folder_dict("images", "weather", subordinate=True)
+        for name, frames in self.animations.items():
+            self.animations[name] = [
+                pygame.transform.scale_by(frame, 0.3) for frame in frames
+            ]
+
     def restart(self):
         self.color = [255, 255, 255]
 
-    def display(self, dt):
+    def display_background(self, dt):
         for index, value in enumerate(self.NIGHT_MARK):
             if self.color[index] > value:
                 self.color[index] -= 2 * dt
 
         self.image.fill(self.color)
         self.screen.blit(self.image, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+
+    def display_foreground(self, dt):
+        animation = self.animations[self.status]
+        self.frame_index += 10 * dt
+        self.frame_index %= len(animation)
+
+        self.screen.blit(animation[int(self.frame_index)], (10, 10))
+
+    def display(self, dt):
+        self.display_foreground(dt)
+        self.display_background(dt)
